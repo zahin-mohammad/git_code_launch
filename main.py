@@ -17,10 +17,16 @@ class CodeGitExtension(Extension):
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         code_command = extension.preferences["code_command"]
+        project_hints = extension.preferences["project_hint"].split(',')
         root_folder = extension.preferences["root_folder"]
-
-        search_command = "find " + root_folder + " -type d -name .git -prune -exec dirname \{} \; | rev | cut -d'/' -f1 | rev"
         
+        # Returns the full path for a project such as /home/username/subfolder/project
+        # example
+        # find ~/Dev \( -type f -o -type d \) \( -name .git -o -name package.json -o -name cargo.toml \) -exec dirname {} \; | sort -u
+
+        find_names = "\\( " + " -o ".join(f"-name {hint}" for hint in project_hints) + " \\)"
+        search_command = f"find {root_folder} \\( -type f -o -type d \\) {find_names} -exec dirname {"{}"} \\; | sort -u"
+
         projects = []
         items = []
 
@@ -46,11 +52,12 @@ class KeywordQueryEventListener(EventListener):
         # Populate items with project names
         for project in projects:
             if project:  # Ensure the project name is not empty
+                project_name = project.split('/')[-1]
                 items.append(ExtensionResultItem(
                     icon='images/icon.png',
-                    name=project,
-                    description=f'Project: {project}',
-                    on_enter=RunScriptAction(f"{code_command} {root_folder}/{project}")
+                    name=project_name,
+                    description=f'{project}',
+                    on_enter=RunScriptAction(f"{code_command} {project}")
                 ))
                 
         if not projects:
