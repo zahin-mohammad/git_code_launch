@@ -18,6 +18,7 @@ class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
         code_command = extension.preferences["code_command"]
         project_hints = extension.preferences["project_hint"].split(',')
+        project_anti_hints = extension.preferences["project_anti_hint"].split(',')
         root_folder = extension.preferences["root_folder"]
         
         # Returns the full path for a project such as /home/username/subfolder/project
@@ -25,7 +26,8 @@ class KeywordQueryEventListener(EventListener):
         # find ~/Dev \( -type f -o -type d \) \( -name .git -o -name package.json -o -name cargo.toml \) -exec dirname {} \; | sort -u
 
         find_names = "\\( " + " -o ".join(f"-name {hint}" for hint in project_hints) + " \\)"
-        search_command = f"find {root_folder} \\( -type f -o -type d \\) {find_names} -exec dirname {"{}"} \\; | sort -u"
+        anti_paths = " -and ".join(f"-not -path '*/{anti}/*'" for anti in project_anti_hints)
+        search_command = f"find {root_folder} \\( -type f -o -type d \\) {anti_paths} {find_names} -exec dirname {"{}"} \\; | sort -u"
 
         projects = []
         items = []

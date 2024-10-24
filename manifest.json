@@ -34,7 +34,14 @@
       "type": "text",
       "name": "Project Hint",
       "description": "What files indicates this folder is a project?",
-      "default_value": ".git,package.json,node_modules,cargo.toml,"
+      "default_value": ".git,package.json,cargo.toml,"
+    },
+    {
+      "id": "project_anti_hint",
+      "type": "text",
+      "name": "Project Anti Hint",
+      "description": "What folders to exclude",
+      "default_value": "node_modules,"
     }
   ]
 }
